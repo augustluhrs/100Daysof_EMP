@@ -4,7 +4,7 @@ using UnityEngine;
 
 // class declarations for 
 // ANIMAL and  DNA
-
+/*
 public class Animal : MonoBehaviour
 {
     //still don't understand this
@@ -13,17 +13,18 @@ public class Animal : MonoBehaviour
     //parts of the Animal
     public string animalName; //need? or Object.name enough?
     public DNA genes;
-    public int eggsInCarton;
-    public int eggsDefault = 3;
-    public float fertility;
-    public float fertilityDefault = .5f;
-    public float refractoryPeriod = 100f; //lowered for debugging 
-    public float refractoryDefault = 500f; 
-    public float lifeSpan;
-    public float lifeSpanDefault = 3000f;
+    //below all in DNA now, to make heritable and mutable
+    // public int eggsInCarton;
+    // public int eggsDefault = 3;
+    // public float fertility;
+    // public float fertilityDefault = .5f;
+    // public float refractoryPeriod = 100f; //lowered for debugging 
+    // public float refractoryDefault = 500f; 
+    // public float lifeSpan;
+    // public float lifeSpanDefault = 3000f;
 
-    public float moveSeed = 1f; //needs to be float? if whole number why not int?
-
+    // public float moveSeed = 1f; //needs to be float? if whole number why not int?
+    
     public Animal() //basic empty
     {
         animalName = "no animalName";
@@ -55,51 +56,144 @@ public class Animal : MonoBehaviour
         lifeSpan = lifeSpanDefault;
 
     }
+    
 }
+*/
 
 public class DNA
 {
-    //parts of the DNA [insides?]
+    //original parts of the DNA
     public Color colorDNA;
+    public float mutationRate;
 
-    public DNA() //random new DNA
+    //from Animal class -- reproduction traits
+    public float eggsInCarton;
+    // public int eggsDefault = 3;
+    public float fertility;
+    // public float fertilityDefault = .5f;
+    public float refractoryPeriod; //lowered for debugging 
+    // public float refractoryDefault = 500f; 
+    public float lifeSpan;
+    // public float lifeSpanDefault = 3000f;
+
+    //movement based variables
+    public float moveSeed;
+    
+     
+    public DNA() //random new DNA, just for reference?
     {
         colorDNA = new Color(Random.Range(0f,1f),Random.Range(0f,1f), Random.Range(0f,1f));
+        mutationRate = 0.3f;
+        eggsInCarton = 3;
+        fertility = 0.5f;
+        refractoryPeriod = 300f;
+        lifeSpan = 3000f;
+        moveSeed = 10f;
     }
 
-    public DNA(Color _color) //basic DNA init
+    // public DNA(Color _color) //basic DNA init
+    // {
+    //     colorDNA = _color;
+    // }
+
+    // public DNA(Color _color, float _mutationRate)
+    // {
+    //     colorDNA = _color;
+    //     mutationRate = _mutationRate;
+    // }
+
+    //new fancy all-encompassing DNA
+    public DNA(Color _color, float _mutationRate, Dictionary<string, float> _reproductionTraits, float _moveSeed)
     {
         colorDNA = _color;
+        mutationRate = _mutationRate;
+        eggsInCarton = _reproductionTraits["eggsInCarton"];
+        fertility = _reproductionTraits["fertility"];
+        refractoryPeriod = _reproductionTraits["refractoryPeriod"];
+        lifeSpan = _reproductionTraits["lifeSpan"];
+        moveSeed = _moveSeed;
     }
 
     public DNA Mutate(DNA papaDNA, DNA papa2DNA) //gene crossover?
     {
-        // float mutationRate = GaussianRange.NextGaussian(.5f, 1f); //need to check these outputs
-        // Debug.Log("mutation rate: " + mutationRate);
-        // DNA babyDNA = new DNA(Color.Lerp(papaDNA.colorDNA, papa2DNA.colorDNA, mutationRate)); //mutation rate not best description, more of parent ratio... mutation rate can be added in addition
-        // DNA babyDNA = new DNA(Color.Lerp(papaDNA.colorDNA, papa2DNA.colorDNA, 0.5f)); //should be exact middle;
-        
-        //new mutation rate and slight shift of parent ratio
-        DNA babyDNA;
-        float parentRatio = Random.Range(0.2f,.8f);
-        Color baseColor = Color.Lerp(papaDNA.colorDNA, papa2DNA.colorDNA, parentRatio);
-        float mutationRate = Random.Range(0f, .3f); //
-        float mutationCheck = Random.Range(0f, 1f);
-        Debug.Log("rate: " + mutationRate + " , check: " + mutationCheck);
-        if(mutationCheck < mutationRate)
+
+        //new complex inheritance and mutation based on specific genotypes(?):
+        // color, mutation rate, reproduction, movement -- CRRM
+        //individual parentRatios, mutationRates, etc.
+
+        //Color
+        float parentRatioColor = GaussianRange.GetGaussian_PointFiveMean();
+        Color babyColor = Color.Lerp(papaDNA.colorDNA, papa2DNA.colorDNA, parentRatioColor);
+        float mutationCheckColor = Random.Range(0f, 1f);
+
+        //Mutation Rate
+        float parentRatioRate = GaussianRange.GetGaussian_PointFiveMean();
+        float babyMutationRate = Mathf.Lerp(papaDNA.mutationRate, papa2DNA.mutationRate, parentRatioRate);
+        float mutationCheckRate = Random.Range(0f, 1f);
+
+        //Reproduction Traits
+        float parentRatioReproduction = GaussianRange.GetGaussian_PointFiveMean();
+        float babyEggsInCarton = Mathf.Lerp(papaDNA.eggsInCarton, papa2DNA.eggsInCarton, parentRatioReproduction);
+        float babyFertility = Mathf.Lerp(papaDNA.fertility, papa2DNA.fertility, parentRatioReproduction);
+        float babyRefractoryPeriod = Mathf.Lerp(papaDNA.refractoryPeriod, papa2DNA.refractoryPeriod, parentRatioReproduction);
+        float babyLifeSpan = Mathf.Lerp(papaDNA.lifeSpan, papa2DNA.lifeSpan, parentRatioReproduction);
+        float mutationCheckReproduction = Random.Range(0f, 1f);
+
+        //Movement
+        float parentRatioMovement = GaussianRange.GetGaussian_PointFiveMean();
+        float babyMoveSeed = Mathf.Lerp(papaDNA.moveSeed, papa2DNA.moveSeed, parentRatioMovement);
+        float mutationCheckMovement = Random.Range(0f, 1f);
+
+        //overall mutation chance -- not sure why not make all indiv, but seems overkill?
+        float mutationChance = Random.Range(0f, babyMutationRate);
+    
+        //now checking for individual mutation types -- CRRM
+        if(mutationCheckColor < mutationChance)
         {
-            float mutationRed = Random.Range(-.2f, .2f); //arbitrary, test for now
-            float mutationGreen = Random.Range(-.2f, .2f); //arbitrary, test for now
-            float mutationBlue = Random.Range(-.2f, .2f); //arbitrary, test for now
-            Color mutatedColor = new Color(baseColor.r * mutationRed, 
-            baseColor.g * mutationGreen, baseColor.b * mutationBlue);
-            babyDNA = new DNA(mutatedColor); 
+            // float mutationRed = GaussianRange.GetGaussian_ZeroMean(); //new gaussian dist.
+            // float mutationGreen = GaussianRange.GetGaussian_ZeroMean(); //new gaussian dist.
+            // float mutationBlue = GaussianRange.GetGaussian_ZeroMean(); //new gaussian dist.
+            float mutationRed = GaussianRange.GetGaussian_SlightZero(); //now muted
+            float mutationGreen = GaussianRange.GetGaussian_SlightZero(); //now muted
+            float mutationBlue = GaussianRange.GetGaussian_SlightZero(); 
+            
+            babyColor = new Color(babyColor.r + mutationRed, babyColor.g + mutationGreen, babyColor.b + mutationBlue); //need to worry about values out of range?
         }
-        else
+        if (mutationCheckRate < mutationChance)
         {
-            babyDNA = new DNA(baseColor);
+            // mutationRate += GaussianRange.GetGaussian_ZeroMean();
+            babyMutationRate += GaussianRange.GetGaussian_SlightZero();
         }
-        
+        if (mutationCheckReproduction < mutationChance)
+        {
+            babyEggsInCarton += GaussianRange.GetGaussian_SlightZero();
+            babyFertility += GaussianRange.GetGaussian_SlightZero();
+            babyRefractoryPeriod += GaussianRange.GetGaussian_SlightZero();
+            babyLifeSpan += GaussianRange.GetGaussian_SlightZero();
+
+        }
+        if (mutationCheckMovement < mutationChance)
+        {
+            babyMoveSeed += GaussianRange.GetGaussian_SlightZero();
+        }
+
+        //reassembling DNA and returning new babyDNA
+        Dictionary<string, float> babyReproductionTraits = new Dictionary<string, float>();
+        babyReproductionTraits.Add("eggsInCarton", babyEggsInCarton);
+        babyReproductionTraits.Add("fertility", babyFertility);
+        babyReproductionTraits.Add("refractoryPeriod", babyRefractoryPeriod);
+        babyReproductionTraits.Add("lifeSpan", babyLifeSpan);
+        Debug.Log("new baby:");
+        Debug.Log("red: " + babyColor.r);
+        Debug.Log("green: " + babyColor.g);
+        Debug.Log("blue: " + babyColor.b);
+        Debug.Log("eggs: " + babyEggsInCarton);
+        Debug.Log("fertility: " + babyFertility);
+        Debug.Log("refractory: " + babyRefractoryPeriod);
+        Debug.Log("lifeSpan: " + babyLifeSpan);
+        Debug.Log("moveseed: " + babyMoveSeed);
+
+        DNA babyDNA = new DNA(babyColor, babyMutationRate, babyReproductionTraits, babyMoveSeed);
         return babyDNA;
     }
 }

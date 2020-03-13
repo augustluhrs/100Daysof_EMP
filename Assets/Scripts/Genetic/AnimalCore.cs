@@ -6,7 +6,11 @@ public class AnimalCore : MonoBehaviour
 {
     public EvolutionManager evolutionManager;
     
-    public Animal thisAnimal;
+    // public Animal thisAnimal;
+    public DNA thisAnimal;
+    public float refractoryPeriodCounter = 0;
+    public float lifeSpanCounter = 0;
+
 
     void Start()
     {
@@ -17,59 +21,69 @@ public class AnimalCore : MonoBehaviour
 
     void FixedUpdate()
     {
-        thisAnimal.lifeSpan--;
-        if (thisAnimal.lifeSpan <= 0)
+        // thisAnimal.lifeSpan--;
+        lifeSpanCounter++;
+        if (thisAnimal.lifeSpan <= lifeSpanCounter)
         {
             Debug.Log(gameObject.name + " has died");
             Destroy(gameObject);
         }
         else
-            thisAnimal.refractoryPeriod--;
+            // thisAnimal.refractoryPeriod--;
+            refractoryPeriodCounter++;
     }
 
     public void Diddle(GameObject _thisAnimal, GameObject _thatAnimal)
     {
         //why not in class? idk
-        Animal thatAnimal = _thatAnimal.GetComponent<AnimalCore>().thisAnimal;
+        // Animal thatAnimal = _thatAnimal.GetComponent<AnimalCore>().thisAnimal;
+
+        DNA thatAnimal = _thatAnimal.GetComponent<AnimalCore>().thisAnimal;
+
         //conceive
-        Debug.Log("conception");
+        // Debug.Log("conception");
         // Debug.Log("this animal name: " + thisAnimal.animalName);
         // Debug.Log("that animal name: " + thatAnimal.animalName);
 
 
-        Animal babyAnimal = Conceive(thisAnimal.genes, thatAnimal.genes);
-        evolutionManager.numAnimals++;
+        // Animal babyAnimal = Conceive(thisAnimal.genes, thatAnimal.genes);
+        DNA babyAnimal = Conceive(thisAnimal, thatAnimal);
+
         //spot
         Vector3 birthplace = Vector3.Lerp(gameObject.transform.position, _thatAnimal.transform.position, 0.5f);
         //birth
         Birth(birthplace, babyAnimal);
         thisAnimal.eggsInCarton--;
-        thisAnimal.refractoryPeriod = thisAnimal.refractoryDefault;
+        refractoryPeriodCounter = 0;
+        // thisAnimal.refractoryPeriod = thisAnimal.refractoryDefault;
         thatAnimal.eggsInCarton--;
-        thatAnimal.refractoryPeriod = thatAnimal.refractoryDefault;
+        _thatAnimal.GetComponent<AnimalCore>().refractoryPeriodCounter = 0;
+        // thatAnimal.refractoryPeriod = thatAnimal.refractoryDefault;
 
     }
 
-    public Animal Conceive(DNA _pitcherDNA, DNA _catcherDNA) //confused about what should be in class and what should be in soul... soul is only individual things?
+    // public Animal Conceive(DNA _pitcherDNA, DNA _catcherDNA) //confused about what should be in class and what should be in soul... soul is only individual things?
+    public DNA Conceive(DNA _pitcherDNA, DNA _catcherDNA)
+
     {
         DNA babyDNA = new DNA();
-        // Debug.Log("num animals in conceive: " + evolutionManager.numAnimals);
-        // Debug.Log("pitcher : " + _pitcherDNA);
-        // Debug.Log("catcher : " + _catcherDNA);
-
-        return new Animal("animal: " + evolutionManager.numAnimals, babyDNA.Mutate(_pitcherDNA, _catcherDNA));
+        return babyDNA.Mutate(_pitcherDNA, _catcherDNA);
+        // return new Animal("animal: " + evolutionManager.numAnimals, babyDNA.Mutate(_pitcherDNA, _catcherDNA));
     }
     
-    public void Birth(Vector3 _birthplace, Animal _babyAnimal) //pop the baby out
+    // public void Birth(Vector3 _birthplace, Animal _babyAnimal) //pop the baby out
+    public void Birth(Vector3 _birthplace, DNA _babyAnimal) //pop the baby out
+
     {
         GameObject newAnimal = Instantiate(evolutionManager.animalPrefab, _birthplace, Quaternion.identity);
         newAnimal.transform.parent = evolutionManager.population.transform;
-        newAnimal.name = _babyAnimal.animalName;
+        newAnimal.name = "animal: " + evolutionManager.numAnimals;
+        evolutionManager.numAnimals++;
         newAnimal.tag = "animal";
         newAnimal.AddComponent<MoveAnimal>();
-        newAnimal.GetComponent<MoveAnimal>().moveSeed = _babyAnimal.moveSeed;
+        newAnimal.GetComponent<MoveAnimal>().moveSeed = Mathf.FloorToInt(_babyAnimal.moveSeed);
         newAnimal.AddComponent<AnimalCore>();
         newAnimal.GetComponent<AnimalCore>().thisAnimal = _babyAnimal;
-        newAnimal.GetComponent<Renderer>().material.SetColor("_Color", _babyAnimal.genes.colorDNA);
+        newAnimal.GetComponent<Renderer>().material.SetColor("_Color", _babyAnimal.colorDNA);
     }
 }

@@ -9,11 +9,19 @@ public class EvolutionManager : MonoBehaviour
     private SocketIOComponent socket;
 
     //global state variables
+    [Range(0f, 1f)][SerializeField] public float mutationDefault = 0.3f;
+    [Range(0f, 2f)][SerializeField] public float populationControlModifier = 0.9f;
+
+
     public int numAnimals = 0; //not just counting population children because dont want name overlap
     public GameObject animalPrefab;
     public GameObject population;
     public GameObject world;
-    
+
+    //DNA defaults
+    public Dictionary<string, float> defaultReproductionTraits = new Dictionary<string, float>();
+    public float defaultMoveSeed;
+
     void Start()
     {
         //socket stuff
@@ -26,6 +34,14 @@ public class EvolutionManager : MonoBehaviour
 		socket.On("close", TestClose);
 
         socket.On("spawn", Spawn);
+
+        //DNA defaults
+        defaultReproductionTraits.Add("eggsInCarton", 3f);
+        defaultReproductionTraits.Add("fertility", .5f);
+        defaultReproductionTraits.Add("refractoryPeriod", 200f);
+        defaultReproductionTraits.Add("lifeSpan", 3000f);
+        defaultMoveSeed = 20f;
+
     }
 
     void Update()
@@ -42,18 +58,19 @@ public class EvolutionManager : MonoBehaviour
 
         Vector3 thisSpot = new Vector3(e.data.GetField("x").f * xScale, .5f, e.data.GetField("y").f * -yScale);
         Color socketColor = new Color(e.data.GetField("r").f/255f, e.data.GetField("g").f/255f, e.data.GetField("b").f/255f);
-        Animal animal = new Animal("animal: " + numAnimals, new DNA(socketColor));
-        numAnimals++;
+        // Animal animal = new Animal("animal: " + numAnimals, new DNA(socketColor, mutationDefault));
+        DNA animal = new DNA(socketColor, mutationDefault, defaultReproductionTraits, defaultMoveSeed);
         //same as Birth() but immaculate
         GameObject newAnimal = Instantiate(animalPrefab, thisSpot, Quaternion.identity);
         newAnimal.transform.parent = population.transform;
-        newAnimal.name = animal.animalName;
+        newAnimal.name = "animal: " + numAnimals;
+        numAnimals++;
         newAnimal.tag = "animal";
         newAnimal.AddComponent<MoveAnimal>();
         newAnimal.GetComponent<MoveAnimal>().moveSeed = animal.moveSeed;
         newAnimal.AddComponent<AnimalCore>();
         newAnimal.GetComponent<AnimalCore>().thisAnimal = animal;
-        newAnimal.GetComponent<Renderer>().material.SetColor("_Color", animal.genes.colorDNA);
+        newAnimal.GetComponent<Renderer>().material.SetColor("_Color", animal.colorDNA);
     }
 
     public void TestOpen(SocketIOEvent e)

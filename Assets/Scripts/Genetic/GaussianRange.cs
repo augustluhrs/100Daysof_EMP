@@ -22,9 +22,32 @@ public static class GaussianRange
 
     public static float NextGaussian(float mean, float standard_deviation) //mean is .5 and sd is 1?
     {
-        float output =  mean + NextGaussian() * standard_deviation;
-        return Mathf.Clamp(output, 0f, 1f);
+        // float output =  mean + NextGaussian() * standard_deviation;
+        // return Mathf.Clamp(output, 0f, 1f);
+        float gauss = NextGaussian();
+        Debug.Log("first value: "  + gauss);
+        return mean + gauss * standard_deviation;
+    }
+    public static float GetGaussian_PointFiveMean()
+    {
+        return Mathf.Clamp((0.5f + NextGaussian() * 0.3413f), 0f, 1f);
+    }
+    //clamping just to be safe
+    public static float GetGaussian_ZeroMean()
+    {
+        return Mathf.Clamp((NextGaussian() * 0.3413f), -1f, 1f);
+    }
+
+    public static float GetGaussian_SlightZero() //for a muted mutation
+    {
+        float baseGauss = Mathf.Clamp((NextGaussian() * 0.3413f), -1f, 1f);
+        float mutedGauss = Mathf.Abs((baseGauss * GetGaussian_ZeroMean()));
+
+        if (baseGauss < 0) //to keep primary polarity
+        {
+            mutedGauss *= -1;
+        }
         
-        // return mean + NextGaussian() * standard_deviation;
+        return mutedGauss;
     }
 }

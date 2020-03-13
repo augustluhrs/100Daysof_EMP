@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class MoveAnimal : MonoBehaviour
 {
+    public EvolutionManager evolutionManager;
+
     //movement variables
     private float moveCounter = 0;
     public float moveSeed; //unique added later
@@ -13,7 +15,7 @@ public class MoveAnimal : MonoBehaviour
 
     void Start()
     {
-        
+        evolutionManager = GameObject.Find("GameEngine").GetComponent<EvolutionManager>();
     }
 
     void FixedUpdate()
@@ -40,21 +42,20 @@ public class MoveAnimal : MonoBehaviour
         {
             if (Physics.Raycast(floorRay, out floorHit, floorDistance)) //if floor ray hits something
                 {
-                    // if (floorHit.collider.gameObject.tag == "world") //need?
-                    if (gameObject.GetComponent<AnimalCore>().thisAnimal.eggsInCarton > 0 &&
-                        gameObject.GetComponent<AnimalCore>().thisAnimal.refractoryPeriod <= 0)
+                    DNA thisAnimalDNA = gameObject.GetComponent<AnimalCore>().thisAnimal;
+                    if (thisAnimalDNA.eggsInCarton > 0 &&
+                        thisAnimalDNA.refractoryPeriod <= gameObject.GetComponent<AnimalCore>().refractoryPeriodCounter)
                     {
                         if (Physics.Raycast(animalRay, out animalHit, animalDistance))
                         {
-                            Debug.Log(gameObject.name + " hit something: " + animalHit.collider.name);
+                            // Debug.Log(gameObject.name + " hit something: " + animalHit.collider.name);
                             if(animalHit.collider.gameObject.tag == "animal")
                             {
                                 GameObject otherAnimal = animalHit.collider.gameObject;
-                                Debug.Log("Their eggs: " + otherAnimal.GetComponent<AnimalCore>().thisAnimal.eggsInCarton);
-                                Debug.Log("Their refractory: " + otherAnimal.GetComponent<AnimalCore>().thisAnimal.refractoryPeriod);
-
-                                if (otherAnimal.GetComponent<AnimalCore>().thisAnimal.eggsInCarton > 0 && 
-                                    otherAnimal.GetComponent<AnimalCore>().thisAnimal.refractoryPeriod <= 0) //if they have eggs left and are ready to go
+                                DNA otherAnimalDNA = otherAnimal.GetComponent<AnimalCore>().thisAnimal;
+                                if (otherAnimalDNA.eggsInCarton > 0 && 
+                                    (thisAnimalDNA.fertility + otherAnimalDNA.fertility) >= evolutionManager.populationControlModifier && //this is new, their combined fertility must be over popControl threshold
+                                    otherAnimalDNA.refractoryPeriod <= otherAnimal.GetComponent<AnimalCore>().refractoryPeriodCounter) //if they have eggs left and are ready to go
                                     gameObject.GetComponent<AnimalCore>().Diddle(gameObject, otherAnimal);
                             }
                         }
