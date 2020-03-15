@@ -17,6 +17,7 @@ public class EvolutionManager : MonoBehaviour
     public GameObject animalPrefab;
     public GameObject population;
     public GameObject world;
+    public GameObject world2;
 
     //DNA defaults
     public Dictionary<string, float> defaultReproductionTraits = new Dictionary<string, float>();
@@ -34,6 +35,8 @@ public class EvolutionManager : MonoBehaviour
 		socket.On("close", TestClose);
 
         socket.On("spawn", Spawn);
+        socket.On("spawn2", Spawn2);
+
 
         //DNA defaults
         defaultReproductionTraits.Add("eggsInCarton", 3f);
@@ -55,8 +58,31 @@ public class EvolutionManager : MonoBehaviour
         // Debug.Log("local Scale: " + world.transform.localScale.x + " , " + world.transform.localScale.z);
         float xScale = world.transform.localScale.x / e.data.GetField("width").f;
         float yScale = world.transform.localScale.z / e.data.GetField("height").f; //negative? or change origin?
+        Debug.Log("world 1" + xScale + " " + yScale);
 
         Vector3 thisSpot = new Vector3(e.data.GetField("x").f * xScale, .5f, e.data.GetField("y").f * -yScale);
+        Color socketColor = new Color(e.data.GetField("r").f/255f, e.data.GetField("g").f/255f, e.data.GetField("b").f/255f);
+        // Animal animal = new Animal("animal: " + numAnimals, new DNA(socketColor, mutationDefault));
+        DNA animal = new DNA(socketColor, mutationDefault, defaultReproductionTraits, defaultMoveSeed);
+        //same as Birth() but immaculate
+        GameObject newAnimal = Instantiate(animalPrefab, thisSpot, Quaternion.identity);
+        newAnimal.transform.parent = population.transform;
+        newAnimal.name = "animal: " + numAnimals;
+        numAnimals++;
+        newAnimal.tag = "animal";
+        newAnimal.AddComponent<MoveAnimal>();
+        newAnimal.GetComponent<MoveAnimal>().moveSeed = animal.moveSeed;
+        newAnimal.AddComponent<AnimalCore>();
+        newAnimal.GetComponent<AnimalCore>().thisAnimal = animal;
+        newAnimal.GetComponent<Renderer>().material.SetColor("_Color", animal.colorDNA);
+    }
+    public void Spawn2(SocketIOEvent e)
+    {
+        // Debug.Log("local Scale: " + world.transform.localScale.x + " , " + world.transform.localScale.z);
+        float xScale = world2.transform.localScale.x / e.data.GetField("width").f;
+        float yScale = world2.transform.localScale.z / e.data.GetField("height").f; //negative? or change origin?
+        Debug.Log("world2" + xScale + " " + yScale);
+        Vector3 thisSpot = new Vector3((e.data.GetField("x").f * xScale) + 15f, .5f, e.data.GetField("y").f * -yScale);
         Color socketColor = new Color(e.data.GetField("r").f/255f, e.data.GetField("g").f/255f, e.data.GetField("b").f/255f);
         // Animal animal = new Animal("animal: " + numAnimals, new DNA(socketColor, mutationDefault));
         DNA animal = new DNA(socketColor, mutationDefault, defaultReproductionTraits, defaultMoveSeed);
