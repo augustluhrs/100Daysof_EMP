@@ -6,7 +6,6 @@ public class AnimalCore : MonoBehaviour
 {
     public EvolutionManager evolutionManager;
     
-    // public Animal thisAnimal;
     public DNA thisAnimal;
     public float refractoryPeriodCounter = 0;
     public float lifeSpanCounter = 0;
@@ -85,5 +84,9 @@ public class AnimalCore : MonoBehaviour
         newAnimal.AddComponent<AnimalCore>();
         newAnimal.GetComponent<AnimalCore>().thisAnimal = _babyAnimal;
         newAnimal.GetComponent<Renderer>().material.SetColor("_Color", _babyAnimal.colorDNA);
+        //update points
+        // Debug.Log("")
+        evolutionManager.player1score += _babyAnimal.pointArray[0];
+        evolutionManager.player2score += _babyAnimal.pointArray[1];
     }
 }

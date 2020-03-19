@@ -79,6 +79,8 @@ public class DNA
     //movement based variables
     public float moveSeed;
     
+    //point ratio tracker
+    public float[] pointArray;
      
     public DNA() //random new DNA, just for reference?
     {
@@ -89,6 +91,7 @@ public class DNA
         refractoryPeriod = 300f;
         lifeSpan = 3000f;
         moveSeed = 10f;
+        // pointArray = [.5f, .5f];
     }
 
     // public DNA(Color _color) //basic DNA init
@@ -103,7 +106,7 @@ public class DNA
     // }
 
     //new fancy all-encompassing DNA
-    public DNA(Color _color, float _mutationRate, Dictionary<string, float> _reproductionTraits, float _moveSeed)
+    public DNA(Color _color, float _mutationRate, Dictionary<string, float> _reproductionTraits, float _moveSeed, float[] _pointArray)
     {
         colorDNA = _color;
         mutationRate = _mutationRate;
@@ -112,6 +115,7 @@ public class DNA
         refractoryPeriod = _reproductionTraits["refractoryPeriod"];
         lifeSpan = _reproductionTraits["lifeSpan"];
         moveSeed = _moveSeed;
+        pointArray = _pointArray;
     }
 
     public DNA Mutate(DNA papaDNA, DNA papa2DNA) //gene crossover?
@@ -143,6 +147,16 @@ public class DNA
         float parentRatioMovement = GaussianRange.GetGaussian_PointFiveMean();
         float babyMoveSeed = Mathf.Lerp(papaDNA.moveSeed, papa2DNA.moveSeed, parentRatioMovement);
         float mutationCheckMovement = Random.Range(0f, 1f);
+
+        //Points
+        //just going to average points since "pure" ones start at one extreme [1, 0] / [0, 1]
+        float[] babyPoints = new float[2];
+        float player1total = papaDNA.pointArray[0] + papa2DNA.pointArray[0];
+        float player2total = papaDNA.pointArray[1] + papa2DNA.pointArray[1];
+        babyPoints[0] = player1total / 2;
+        babyPoints[1] = player2total / 2;
+        Debug.Log("player 1 ratio: " + babyPoints[0]);
+        Debug.Log("player 2 ratio: " + babyPoints[1]);
 
         //overall mutation chance -- not sure why not make all indiv, but seems overkill?
         float mutationChance = Random.Range(0f, babyMutationRate);
@@ -193,7 +207,7 @@ public class DNA
         Debug.Log("lifeSpan: " + babyLifeSpan);
         Debug.Log("moveseed: " + babyMoveSeed);
 
-        DNA babyDNA = new DNA(babyColor, babyMutationRate, babyReproductionTraits, babyMoveSeed);
+        DNA babyDNA = new DNA(babyColor, babyMutationRate, babyReproductionTraits, babyMoveSeed, babyPoints);
         return babyDNA;
     }
 }

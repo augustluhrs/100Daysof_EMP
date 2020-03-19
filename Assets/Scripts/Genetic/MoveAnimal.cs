@@ -43,8 +43,8 @@ public class MoveAnimal : MonoBehaviour
             if (Physics.Raycast(floorRay, out floorHit, floorDistance)) //if floor ray hits something
                 {
                     DNA thisAnimalDNA = gameObject.GetComponent<AnimalCore>().thisAnimal;
-                    if (thisAnimalDNA.eggsInCarton > 0 &&
-                        thisAnimalDNA.refractoryPeriod <= gameObject.GetComponent<AnimalCore>().refractoryPeriodCounter)
+                    // if (thisAnimalDNA.eggsInCarton > 0 &&
+                    if(thisAnimalDNA.refractoryPeriod <= gameObject.GetComponent<AnimalCore>().refractoryPeriodCounter)
                     {
                         if (Physics.Raycast(animalRay, out animalHit, animalDistance))
                         {
@@ -53,8 +53,10 @@ public class MoveAnimal : MonoBehaviour
                             {
                                 GameObject otherAnimal = animalHit.collider.gameObject;
                                 DNA otherAnimalDNA = otherAnimal.GetComponent<AnimalCore>().thisAnimal;
-                                if (otherAnimalDNA.eggsInCarton > 0 && 
-                                    (thisAnimalDNA.fertility + otherAnimalDNA.fertility) >= evolutionManager.populationControlModifier && //this is new, their combined fertility must be over popControl threshold
+                                float fertilityCheck = Random.Range(0f, 1f); //just arbitrary for now, can be manipulated by nature
+                                // if (otherAnimalDNA.eggsInCarton > 0 && 
+                                    // (thisAnimalDNA.fertility + otherAnimalDNA.fertility) >= evolutionManager.populationControlModifier && //this is new, their combined fertility must be over popControl threshold
+                                if ((thisAnimalDNA.fertility + otherAnimalDNA.fertility) >= fertilityCheck &&
                                     otherAnimalDNA.refractoryPeriod <= otherAnimal.GetComponent<AnimalCore>().refractoryPeriodCounter) //if they have eggs left and are ready to go
                                     gameObject.GetComponent<AnimalCore>().Diddle(gameObject, otherAnimal);
                             }
