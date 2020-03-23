@@ -48,8 +48,15 @@ public class MoveAnimal : MonoBehaviour
                     {
                         if (Physics.Raycast(animalRay, out animalHit, animalDistance))
                         {
-                            // Debug.Log(gameObject.name + " hit something: " + animalHit.collider.name);
-                            if(animalHit.collider.gameObject.tag == "animal")
+                            Debug.Log(animalHit.collider.gameObject.tag);
+                            //putting food here for now
+                            if(animalHit.collider.gameObject.tag == "food")
+                            {
+                                Destroy(animalHit.collider.gameObject);
+                                gameObject.GetComponent<AnimalCore>().belly++;
+                            }
+                            //main animal if
+                            if(animalHit.collider.gameObject.tag == "animal" && gameObject.GetComponent<AnimalCore>().belly > 0) //just belly of initiator or both?
                             {
                                 GameObject otherAnimal = animalHit.collider.gameObject;
                                 DNA otherAnimalDNA = otherAnimal.GetComponent<AnimalCore>().thisAnimal;

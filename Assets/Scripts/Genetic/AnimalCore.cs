@@ -9,6 +9,9 @@ public class AnimalCore : MonoBehaviour
     public DNA thisAnimal;
     public float refractoryPeriodCounter = 0;
     public float lifeSpanCounter = 0;
+    public float belly = 0;
+    public float hungerBuffer;
+    public float hungerCounter = 0;
 
 
     void Start()
@@ -16,12 +19,25 @@ public class AnimalCore : MonoBehaviour
         // if (thisAnimal == null)
         //     thisAnimal = new Animal();
         evolutionManager = GameObject.Find("GameEngine").GetComponent<EvolutionManager>();
+        hungerBuffer = thisAnimal.lifeSpan / 10;
     }
 
     void FixedUpdate()
     {
         // thisAnimal.lifeSpan--;
-        lifeSpanCounter++;
+        hungerCounter++;
+        if (hungerCounter >= hungerBuffer)
+        {
+            if (belly > 0)
+            {
+                belly--;
+                hungerCounter = 0;
+            }
+            else 
+            {
+                lifeSpanCounter++;
+            }
+        }
         if (thisAnimal.lifeSpan <= lifeSpanCounter)
         {
             Debug.Log(gameObject.name + " has died");
